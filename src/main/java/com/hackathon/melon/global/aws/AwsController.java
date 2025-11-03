@@ -12,7 +12,7 @@ public class AwsController {
 
     @PostMapping("/assume")
     public String assumeAndListBuckets(@RequestBody AssumeRoleRequestDto assumeRoleRequestDto) {
-        awsService.testAssumeRole(assumeRoleRequestDto);
+        awsService.getAssumeRole(assumeRoleRequestDto);
         return "STS AssumeRole success. Check server logs for results.";
     }
 }
