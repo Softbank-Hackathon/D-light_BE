@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 
 
 @Service
@@ -45,18 +46,20 @@ public class DeploymentServiceImpl implements DeploymentService {
                     deploymentRequestDto.getRegion(),
                     projectName
             );
-            //TOdo: 깃허브 연동 및 배포 스크립트 실행 로직 구현
+            //TOdo: 프론트 깃허브 연동 및 배포 스크립트 실행 로직 구현
+
+
 
 
 
         } else if (deploymentRequestDto.getProjectType().equals("backend")) { // 백엔드 프로젝트인 경우
             String projectName = deploymentRequestDto.getProjectName()+"-backend";
-            ec2DeployService.createSmallestEc2(
+            RunInstancesResponse response=  ec2DeployService.createSmallestEc2(
                     creds,
                     deploymentRequestDto.getRegion(),
                     projectName
-            ); // 백엔드 프로젝트용 가장 작은 EC2 인스턴스 생성
-            //TOdo: 깃허브 연동 및 배포 스크립트 실행 로직 구현
+            );
+            //TOdo: 백엔드 깃허브 연동 및 배포 스크립트 실행 로직 구현
 
         }
         else{

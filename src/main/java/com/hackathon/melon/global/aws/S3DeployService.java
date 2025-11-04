@@ -39,6 +39,27 @@ public class S3DeployService {
                     .build());
             log.info("정적 웹사이트 호스팅 활성화 완료: {}", projectName);
 
+            String policy = """
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "PublicReadGetObject",
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": ["s3:GetObject"],
+                  "Resource": ["arn:aws:s3:::%s/*"]
+                }
+              ]
+            }
+            """.formatted(projectName);
+
+            s3.putBucketPolicy(PutBucketPolicyRequest.builder()
+                    .bucket(projectName)
+                    .policy(policy)
+                    .build());
+            log.info("퍼블릭 읽기 정책 추가 완료: {}", projectName);
+
         } catch (S3Exception e) {
             log.error("S3 버킷 생성 실패: {}", e.awsErrorDetails().errorMessage());
             throw new RuntimeException("S3 버킷 생성에 실패했습니다.");

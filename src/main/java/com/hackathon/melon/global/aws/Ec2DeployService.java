@@ -16,7 +16,7 @@ public class Ec2DeployService {
 
     private final AmiUbuntuService amiUbuntuService;
 
-    public void createSmallestEc2(AwsSessionCredentials sessionCredentials, String region, String projectName) {
+    public RunInstancesResponse createSmallestEc2(AwsSessionCredentials sessionCredentials, String region, String projectName) {
 
         String ubuntuAmiId =amiUbuntuService.getLatestUbuntuAmiId(region);
 
@@ -40,5 +40,6 @@ public class Ec2DeployService {
 
         RunInstancesResponse response = ec2.runInstances(request);
         log.info("EC2 인스턴스 생성됨: {}", response.instances().get(0).instanceId());
+        return response;
     }
 }
