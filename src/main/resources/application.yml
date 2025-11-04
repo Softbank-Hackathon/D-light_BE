@@ -1,5 +1,0 @@
-logging:
-  level:
-    root: info
-    com.hackathon.melon: debug
-    software.amazon.awssdk: warn

@@ -1,0 +1,33 @@
+logging:
+  level:
+    root: info
+    com.hackathon.melon: debug
+    software.amazon.awssdk: warn
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/Dlight?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: YOUR_MYSQL_PASSWORD_HERE
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: user:email, read:user
+            redirect-uri: "{baseUrl}/login/oauth2/code/github"
+            client-name: GitHub
+        provider:
+          github:
+            user-name-attribute: id
