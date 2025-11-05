@@ -5,6 +5,7 @@ import com.hackathon.melon.domain.deployment.service.DeploymentService;
 import com.hackathon.melon.global.common.CustomApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class DeploymentController {
     @Operation(summary = "자동화 배포", description = "프로젝트를 자동으로 배포합니다.")
     @PostMapping("/deployment-project")
     public ResponseEntity<CustomApiResponse<String>> deployProject(
-            @RequestBody DeploymentRequestDto deploymentRequestDto) {
+            @Valid @RequestBody DeploymentRequestDto deploymentRequestDto) {
         try {
             deploymentService.deployProject(deploymentRequestDto);
             return ResponseEntity.ok(CustomApiResponse.onSuccess("프로젝트 배포가 시작되었습니다."));
