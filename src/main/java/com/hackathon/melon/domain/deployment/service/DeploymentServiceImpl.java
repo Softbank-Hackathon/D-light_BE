@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.s3.S3Client;
 
 
 @Service
@@ -36,6 +37,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             log.error("STS AssumeRole 실패: {}", e.getMessage(), e);
             throw new RuntimeException("AWS 권한 위임(AssumeRole)에 실패했습니다. Role ARN 또는 ExternalId를 확인하세요.");
         }
+        String env = deploymentRequestDto.getEnvironmentVariables();
 
         // 프로젝트 타입에 따라 배포 로직 분기 추후 메서드 분리 고려
 
@@ -46,6 +48,7 @@ public class DeploymentServiceImpl implements DeploymentService {
                     deploymentRequestDto.getRegion(),
                     projectName
             );
+
             //TOdo: 프론트 깃허브 연동 및 배포 스크립트 실행 로직 구현
 
 

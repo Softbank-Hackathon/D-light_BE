@@ -21,6 +21,9 @@ public class DeploymentRequestDto {
     @Schema(description = "프레임워크 또는 프로젝트 유형", example = "fronted = Vanila JS, React, Vue.js, Angular, Svelte || backend = springboot, django, nodejs ")
     private String frameworkType;
 
+    @Schema(description = "환경변수", example = "{\"KEY1\":\"value1\",\"KEY2\":\"value2\"}")
+    private String environmentVariables;
+
     @NotBlank(message = "AWS 리전은 필수 입력 항목입니다.")
     @Schema(description = "배포할 AWS 리전", example = "ap-northeast-2")
     private String region;
