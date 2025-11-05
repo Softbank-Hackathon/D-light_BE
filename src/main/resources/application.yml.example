@@ -31,3 +31,11 @@ spring:
         provider:
           github:
             user-name-attribute: id
+
+# 애플리케이션 설정
+app:
+  oauth2:
+    # OAuth2 로그인 성공 후 리다이렉트할 프론트엔드 URL
+    # 개발: http://localhost:3000
+    # 운영: https://your-frontend-domain.com
+    redirect-uri: ${FRONTEND_URL:http://localhost:3000}
