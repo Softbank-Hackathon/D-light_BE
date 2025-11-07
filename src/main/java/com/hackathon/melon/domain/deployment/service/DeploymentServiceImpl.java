@@ -1,7 +1,12 @@
 package com.hackathon.melon.domain.deployment.service;
 
 import com.hackathon.melon.domain.deployment.dto.request.DeploymentRequestDto;
+// Project_Service Repository, Entity 에서 repo url, service name (기존에는 project name이엇으나 서비스로 변경 - 하위 작업이라서.. )
+// 및 default_branch 가져오도록 변경함. default_branch 의 경우 기본값 main 에서 사용자 입력시 override 되도록 구현 필요..(제가 해야되는..아마도?)
 import com.hackathon.melon.domain.deployment.dto.request.FrontendDeploymentRequestDto;
+import com.hackathon.melon.domain.project.entity.ProjectService;
+import com.hackathon.melon.domain.project.repository.ProjectServiceRepository;
+// 위의 project_service dto load 관련 임포트 문입니다~
 import com.hackathon.melon.global.aws.AssumeRoleRequestDto;
 import com.hackathon.melon.global.aws.AwsService;
 import com.hackathon.melon.global.aws.Ec2DeployService;
@@ -30,6 +35,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     private final AwsService awsService;
     private final Ec2DeployService ec2DeployService;
     private final S3DeployService s3DeployService;
+    private final ProjectServiceRepository projectServiceRepository;
 
     @Override
     public void deployProject(DeploymentRequestDto deploymentRequestDto) {
@@ -83,9 +89,17 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
     @Override
     public String deployFrontend(FrontendDeploymentRequestDto dto) {
+        ProjectService projectService = projectServiceRepository.findById(dto.getServiceId())
+                .orElseThrow(() -> new IllegalArgumentException("서비스를 찾을 수 없습니다."));
+
+        log.info("Project Service Loaded: {}", projectService);
+        log.info("GitHub Repo URL: {}", projectService.getGithubRepoUrl());
+        log.info("Default Branch: {}", projectService.getDefaultBranch());
+        log.info("Service Name: {}", projectService.getServiceName());
+
         AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(dto.getRoleArn(), dto.getExternalId()));
 
-        String projectName = dto.getProjectName() + "-frontend";
+        String projectName = projectService.getServiceName() + "-frontend";
 
         Path workDir = Paths.get("src/main/resources/deploy", projectName).toAbsolutePath(); //프로젝트 이름으로 작업 디렉토리 설정
 
@@ -94,8 +108,8 @@ public class DeploymentServiceImpl implements DeploymentService {
             Files.createDirectories(workDir);
             log.info("프로젝트 파일 저장 위치 : {}", workDir.toString());
 
-            String branch = dto.getBranch() != null ? dto.getBranch() : "main";
-            run("git clone -b " + branch + " " + dto.getGithubRepositoryUrl() + " " + workDir, null);
+            String branch = projectService.getDefaultBranch() != null ? projectService.getDefaultBranch() : "main";
+            run("git clone -b " + branch + " " + projectService.getGithubRepoUrl() + " " + workDir, null);
             String pm = detectPackageManager(workDir);
 
             run("cd " + workDir + " && " + pm + " install", dto.getEnv()); // 패키지 매니저에 맞게 의존성 설치
