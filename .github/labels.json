@@ -1,0 +1,128 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "예상치 못한 문제나 버그"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "새로운 기능이나 개선 사항"
+  },
+  {
+    "name": "documentation",
+    "color": "0075ca",
+    "description": "문서 개선 또는 추가"
+  },
+  {
+    "name": "question",
+    "color": "d876e3",
+    "description": "질문이나 도움이 필요한 경우"
+  },
+  {
+    "name": "refactor",
+    "color": "fbca04",
+    "description": "코드 리팩토링"
+  },
+  {
+    "name": "performance",
+    "color": "c2e0c6",
+    "description": "성능 개선"
+  },
+  {
+    "name": "security",
+    "color": "ee0701",
+    "description": "보안 관련 이슈"
+  },
+  {
+    "name": "test",
+    "color": "0e8a16",
+    "description": "테스트 추가 또는 수정"
+  },
+  {
+    "name": "chore",
+    "color": "ffffff",
+    "description": "빌드 설정, 패키지 관리 등"
+  },
+  {
+    "name": "ci",
+    "color": "bfd4f2",
+    "description": "CI/CD 관련 변경"
+  },
+  {
+    "name": "api",
+    "color": "1d76db",
+    "description": "API 변경 또는 추가"
+  },
+  {
+    "name": "backend",
+    "color": "0052cc",
+    "description": "백엔드 관련 작업"
+  },
+  {
+    "name": "deployment",
+    "color": "5319e7",
+    "description": "배포 관련 작업"
+  },
+  {
+    "name": "auth",
+    "color": "f9d0c4",
+    "description": "인증/인가 관련 작업"
+  },
+  {
+    "name": "aws",
+    "color": "ff9900",
+    "description": "AWS 관련 작업"
+  },
+  {
+    "name": "github",
+    "color": "24292e",
+    "description": "GitHub 연동 관련 작업"
+  },
+  {
+    "name": "database",
+    "color": "b60205",
+    "description": "데이터베이스 관련 작업"
+  },
+  {
+    "name": "urgent",
+    "color": "b60205",
+    "description": "긴급 수정 필요"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "초보자가 시작하기 좋은 이슈"
+  },
+  {
+    "name": "help wanted",
+    "color": "008672",
+    "description": "도움이 필요한 이슈"
+  },
+  {
+    "name": "wontfix",
+    "color": "ffffff",
+    "description": "수정하지 않을 이슈"
+  },
+  {
+    "name": "duplicate",
+    "color": "cfd3d7",
+    "description": "중복된 이슈"
+  },
+  {
+    "name": "invalid",
+    "color": "e4e669",
+    "description": "유효하지 않은 이슈"
+  },
+  {
+    "name": "in progress",
+    "color": "fbca04",
+    "description": "작업 진행 중"
+  },
+  {
+    "name": "blocked",
+    "color": "d93f0b",
+    "description": "차단된 이슈"
+  }
+]
+

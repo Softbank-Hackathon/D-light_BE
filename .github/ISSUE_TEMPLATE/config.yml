@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 질문 및 문의
+    url: https://github.com/YOUR_USERNAME/YOUR_REPO/discussions
+    about: 일반적인 질문이나 토론은 Discussions에서 해주세요
+  - name: 📚 문서
+    url: https://github.com/YOUR_USERNAME/YOUR_REPO/wiki
+    about: 프로젝트 문서를 확인해주세요
+
