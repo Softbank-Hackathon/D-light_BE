@@ -1,0 +1,108 @@
+# Issue 제목이나 본문에 키워드가 포함되면 자동으로 라벨 부여
+
+bug:
+  - '[BUG]'
+  - '버그'
+  - '에러'
+  - '오류'
+  - 'bug'
+  - 'error'
+
+enhancement:
+  - '[FEATURE]'
+  - '기능'
+  - 'feature'
+  - '추가'
+
+documentation:
+  - '[DOCS]'
+  - '문서'
+  - 'documentation'
+  - 'docs'
+
+question:
+  - '[QUESTION]'
+  - '질문'
+  - 'question'
+  - '도움'
+
+refactor:
+  - '[REFACTOR]'
+  - '리팩토링'
+  - 'refactor'
+
+performance:
+  - '[PERF]'
+  - '성능'
+  - 'performance'
+  - '속도'
+
+security:
+  - '[SECURITY]'
+  - '보안'
+  - 'security'
+  - '취약점'
+
+api:
+  - 'api'
+  - 'API'
+  - '엔드포인트'
+  - 'endpoint'
+  - '/api/'
+
+backend:
+  - '백엔드'
+  - 'backend'
+  - '서버'
+  - 'Spring'
+
+deployment:
+  - '배포'
+  - 'deployment'
+  - '배포'
+  - 'EC2'
+  - 'S3'
+
+auth:
+  - '인증'
+  - 'auth'
+  - '로그인'
+  - 'OAuth'
+  - 'OAuth2'
+
+aws:
+  - 'AWS'
+  - 'aws'
+  - '아마존'
+
+github:
+  - 'GitHub'
+  - 'github'
+  - '깃허브'
+
+database:
+  - '데이터베이스'
+  - 'database'
+  - 'DB'
+  - 'MySQL'
+  - '쿼리'
+
+test:
+  - '테스트'
+  - 'test'
+  - '테스트 코드'
+
+chore:
+  - '빌드'
+  - 'chore'
+  - '의존성'
+  - 'dependencies'
+  - 'Gradle'
+
+ci:
+  - 'CI'
+  - 'ci'
+  - 'CD'
+  - '워크플로우'
+  - 'workflow'
+

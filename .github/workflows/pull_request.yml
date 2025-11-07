@@ -1,0 +1,41 @@
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  pr-lint:
+    name: PR 제목 검증
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR 제목 형식 검증
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            perf
+            ci
+          scopes: |
+            auth
+            deployment
+            user
+            github
+            aws
+            config
+            global
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            PR 제목은 소문자로 시작해야 합니다.
+
