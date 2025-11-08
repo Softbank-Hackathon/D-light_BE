@@ -49,3 +49,19 @@ spring:
 app:
   oauth2:
     redirect-uri: http://54.180.117.76:8080/
+
+# AWS 설정
+aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+  onboarding:
+    template:
+      bucket: ${AWS_ONBOARDING_BUCKET:dlite-template-bucket}
+      key: ${AWS_ONBOARDING_KEY:template.yaml}
+      region: ${AWS_ONBOARDING_REGION:ap-northeast-2}
+
+# 인증 설정
+auth:
+  onboarding:
+    hmac-secret: ${AUTH_HMAC_SECRET:change-this-in-production}
