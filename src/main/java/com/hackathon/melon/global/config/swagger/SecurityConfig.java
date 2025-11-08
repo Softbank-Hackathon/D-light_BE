@@ -80,6 +80,9 @@ public class SecurityConfig {
 
         // 허용할 출처 (프론트엔드 URL + 백엔드 자신)
         configuration.setAllowedOrigins(List.of(
+                //TODO: ECS 기준으로 변경
+                "http://localhost:8080",
+                "http://43.201.115.11:8080",
                 "http://54.180.117.76:8080",  // 백엔드 자신 (Swagger OAuth2 로그인용)
                 "http://localhost:3000"       // 로컬 개발용 프론트엔드
         ));

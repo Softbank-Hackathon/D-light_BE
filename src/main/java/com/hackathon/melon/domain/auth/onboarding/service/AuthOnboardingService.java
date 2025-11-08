@@ -21,15 +21,12 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HexFormat;
 
 @Slf4j
 @Service
@@ -53,9 +50,6 @@ public class AuthOnboardingService {
 
     @Value("${aws.onboarding.template.region:ap-northeast-2}")
     private String templateRegion;
-
-    @Value("${auth.onboarding.hmac-secret}")
-    private String hmacSecret;
 
     private static final String TOKEN_PREFIX = "rgx_";
     private static final int TOKEN_LENGTH = 32;
@@ -121,19 +115,13 @@ public class AuthOnboardingService {
      * 3️⃣ CloudFormation Lambda 콜백
      */
     @Transactional
-
-    public CfnCallbackResponse handleCfnCallback(String registrationToken, String signature, CfnCallbackRequest request, String rawBody) {
+    public CfnCallbackResponse handleCfnCallback(String registrationToken, CfnCallbackRequest request) {
         // 토큰 검증
         RegistrationToken token = registrationTokenRepository.findByToken(registrationToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid registration token"));
 
         if (!token.isValid()) {
             throw new IllegalArgumentException("Registration token is expired or already used");
-        }
-
-        // Signature 검증 (선택적이지만 권장)
-        if (signature != null && !verifySignature(registrationToken, rawBody, signature)) {
-            throw new SecurityException("Invalid signature");
         }
 
         // 멱등성: stackId로 기존 ProjectTarget 확인
@@ -243,23 +231,6 @@ public class AuthOnboardingService {
         } catch (Exception e) {
             log.error("Failed to build quick create URL", e);
             throw new RuntimeException("Failed to build quick create URL", e);
-        }
-    }
-
-    private boolean verifySignature(String token, String rawBody, String providedSignature) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(
-                    hmacSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(secretKeySpec);
-
-            byte[] hash = mac.doFinal((token + rawBody).getBytes(StandardCharsets.UTF_8));
-            String expectedSignature = HexFormat.of().formatHex(hash);
-
-            return expectedSignature.equalsIgnoreCase(providedSignature);
-        } catch (Exception e) {
-            log.error("Failed to verify signature", e);
-            return false;
         }
     }
 }

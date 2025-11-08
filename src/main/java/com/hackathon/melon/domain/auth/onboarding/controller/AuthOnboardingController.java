@@ -62,12 +62,10 @@ public class AuthOnboardingController {
     @PostMapping("/cfn-callback")
     public ResponseEntity<CustomApiResponse<CfnCallbackResponse>> handleCfnCallback(
             @RequestHeader("X-Dlite-Registration-Token") String registrationToken,
-            @RequestHeader(value = "X-Dlite-Signature", required = false) String signature,
-            @Valid @RequestBody CfnCallbackRequest request,
-            @RequestBody String rawBody) {
+            @Valid @RequestBody CfnCallbackRequest request) {
 
         CfnCallbackResponse response = authOnboardingService.handleCfnCallback(
-                registrationToken, signature, request, rawBody);
+                registrationToken, request);
 
         return ResponseEntity.ok(CustomApiResponse.onSuccess(response));
     }
