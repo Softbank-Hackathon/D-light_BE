@@ -6,7 +6,7 @@ logging:
 
 spring:
   profiles:
-    default: prod
+    active: ${SPRING_PROFILES_ACTIVE:local}  # 기본값 local, 배포 시 prod로 설정
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create  # 프로덕션: validate 또는 none (create는 데이터 삭제 위험!)
     show-sql: false
     properties:
       hibernate:
@@ -40,3 +40,8 @@ spring:
 
   deploy:
     workDir: src/main/resources/workspace
+
+# OAuth2 로그인 성공 후 리다이렉트할 URL (프론트엔드 배포 전까지는 백엔드 URL)
+app:
+  oauth2:
+    redirect-uri: http://54.180.117.76:8080/

@@ -1,10 +1,10 @@
 package com.hackathon.melon.domain.project.service;
 
 import com.hackathon.melon.domain.project.dto.ProjectTargetRequestDto;
-import com.hackathon.melon.domain.project.entity.Project;
 import com.hackathon.melon.domain.project.entity.ProjectTarget;
-import com.hackathon.melon.domain.project.repository.ProjectRepository;
 import com.hackathon.melon.domain.project.repository.ProjectTargetRepository;
+import com.hackathon.melon.domain.user.entity.User;
+import com.hackathon.melon.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,22 +15,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectTargetService {
 
-    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
     private final ProjectTargetRepository projectTargetRepository;
 
     @Transactional
     public ProjectTarget createProjectTarget(ProjectTargetRequestDto requestDto) {
-        Project project = projectRepository.findById(requestDto.getProjectId())
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + requestDto.getProjectId()));
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + requestDto.getUserId()));
 
         ProjectTarget projectTarget = ProjectTarget.builder()
-                .project(project)
+                .user(user)
                 .env(requestDto.getEnv())
                 .roleArn(requestDto.getRoleArn())
                 .externalId(requestDto.getExternalId())
                 .region(requestDto.getRegion())
                 .sessionDurationSecs(requestDto.getSessionDurationSecs())
-                .isDefault(true)
+                .isDefault(requestDto.isDefault())
                 .build();
 
         return projectTargetRepository.save(projectTarget);

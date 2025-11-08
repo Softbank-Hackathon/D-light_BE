@@ -1,6 +1,6 @@
 package com.hackathon.melon.domain.project.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hackathon.melon.domain.project.entity.EnvType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ProjectTargetRequestDto {
-    private Long projectId;
+    private Long userId;
     private EnvType env;
     private String roleArn;
     private String externalId;
     private String region;
     private Integer sessionDurationSecs;
 
-    @JsonAlias("default")
-    private boolean Default;
+    @JsonProperty("default")
+    private boolean isDefault;
 }

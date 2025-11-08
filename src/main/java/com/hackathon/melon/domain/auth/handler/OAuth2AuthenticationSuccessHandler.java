@@ -19,6 +19,8 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    //TODO: localhost 3000 으로 왜 빠지지?
+
     @Value("${app.oauth2.redirect-uri:http://localhost:3000}")
     private String frontendUrl;
 

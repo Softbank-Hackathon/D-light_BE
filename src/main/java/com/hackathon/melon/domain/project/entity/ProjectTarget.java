@@ -1,5 +1,6 @@
 package com.hackathon.melon.domain.project.entity;
 
+import com.hackathon.melon.domain.user.entity.User;
 import com.hackathon.melon.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -10,9 +11,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "project_targets", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"project_id", "env"})
-})
+@Table(name = "project_targets",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_user_env", columnNames = {"user_id", "env"})
+    },
+    indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id"),
+        @Index(name = "idx_user_default", columnList = "user_id, is_default")
+    }
+)
 public class ProjectTarget extends BaseEntity {
 
     @Id
@@ -20,11 +27,11 @@ public class ProjectTarget extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
+    @Column(name = "env", nullable = true)
     private EnvType env;
 
     @Column(name = "role_arn")
@@ -33,17 +40,18 @@ public class ProjectTarget extends BaseEntity {
     @Column(name = "external_id", columnDefinition = "TEXT")
     private String externalId;
 
+    @Column(name = "region")
     private String region;
 
     @Column(name = "session_duration_secs")
     private Integer sessionDurationSecs;
 
-    @Column(name = "is_default")
+    @Column(name = "is_default", nullable = false)
     private boolean isDefault;
 
     @Builder
-    public ProjectTarget(Project project, EnvType env, String roleArn, String externalId, String region, Integer sessionDurationSecs, boolean isDefault) {
-        this.project = project;
+    public ProjectTarget(User user, EnvType env, String roleArn, String externalId, String region, Integer sessionDurationSecs, boolean isDefault) {
+        this.user = user;
         this.env = env;
         this.roleArn = roleArn;
         this.externalId = externalId;
