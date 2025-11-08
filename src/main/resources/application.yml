@@ -1,0 +1,42 @@
+logging:
+  level:
+    root: info
+    com.hackathon.melon: debug
+    software.amazon.awssdk: warn
+
+spring:
+  profiles:
+    default: prod
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:${MYSQL_USER}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${MYSQL_PASSWORD}}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc.time_zone: Asia/Seoul
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: user:email, read:user
+            redirect-uri: "{baseUrl}/login/oauth2/code/github"
+            client-name: GitHub
+        provider:
+          github:
+            user-name-attribute: id
+
+  deploy:
+    workDir: src/main/resources/workspace
