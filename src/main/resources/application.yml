@@ -13,10 +13,15 @@ spring:
     timeout: 12h  # 세션 타임아웃 12시간 (기본값 30분)
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+#    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${SPRING_DATASOURCE_USERNAME:${MYSQL_USER}}
     password: ${SPRING_DATASOURCE_PASSWORD:${MYSQL_PASSWORD}}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      initialization-fail-timeout: 0     # ← 가장 중요
+      connection-timeout: 30000          # (선택) 커넥션 얻기 타임아웃 여유
+      maximum-pool-size: 10              # (선택) 기본값이면 생략 가능
 
   jpa:
     hibernate:
