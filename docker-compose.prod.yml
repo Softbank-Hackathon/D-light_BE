@@ -1,39 +1,39 @@
-version: '3.8'
-
-services:
-  application:
-    container_name: backend
-    image: kimhongseok/springboot-auto:latest
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: prod  # 프로덕션 프로파일 활성화
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - autoDeploy
-
-  mysql:
-    container_name: mysql
-    image: mysql:latest
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - autoDeploy
-
-networks:
-  autoDeploy:
+#version: '3.8'
+#
+#services:
+#  application:
+#    container_name: backend
+#    image: kimhongseok/springboot-auto:latest
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - .env
+#    environment:
+#      SPRING_PROFILES_ACTIVE: prod  # 프로덕션 프로파일 활성화
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+#      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+#      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - autoDeploy
+#
+#  mysql:
+#    container_name: mysql
+#    image: mysql:latest
+#    ports:
+#      - "3306:3306"
+#    environment:
+#      MYSQL_DATABASE: ${MYSQL_DATABASE}
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+#    healthcheck:
+#      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#    networks:
+#      - autoDeploy
+#
+#networks:
+#  autoDeploy:
