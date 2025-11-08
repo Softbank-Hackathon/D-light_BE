@@ -32,7 +32,7 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: user:email, read:user
-            redirect-uri: "{baseUrl}/login/oauth2/code/github"
+            redirect-uri: "http://54.180.117.76:8080/login/oauth2/code/github"
             client-name: GitHub
         provider:
           github:
