@@ -121,6 +121,7 @@ public class AuthOnboardingService {
      * 3️⃣ CloudFormation Lambda 콜백
      */
     @Transactional
+
     public CfnCallbackResponse handleCfnCallback(String registrationToken, String signature, CfnCallbackRequest request, String rawBody) {
         // 토큰 검증
         RegistrationToken token = registrationTokenRepository.findByToken(registrationToken)

@@ -7,20 +7,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // ✅ 스프링 HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
@@ -30,68 +29,62 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // CORS 설정
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http
+                // CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-        // CSRF 비활성화 (프론트엔드 분리 환경)
-        // 세션 쿠키는 HttpOnly, SameSite 속성으로 보호됨
-        http.csrf(csrf -> csrf.disable());
+                // CSRF: 전역 비활성 대신, 콜백만 예외로 두는 패턴 권장
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/v1/auth/cfn-callback",
+                                "/swagger-ui/**", "/v3/api-docs/**") // 필요 시
+                )
 
-        // 인증/인가 설정
-        http.authorizeHttpRequests(auth -> auth
-                // 공개 경로 (인증 불필요)
-                .requestMatchers("/", "/health", "/error").permitAll()
-                // OAuth2 로그인 관련 경로는 Spring Security가 자동 처리
-                .requestMatchers("/oauth2/**", "/login/**").permitAll()
-                // API 경로는 인증 필요
-                .requestMatchers("/api/**").authenticated()
-                // swagger 열려라
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // 그 외 모든 요청은 인증 필요
-                .anyRequest().authenticated()
-        );
+                // 인가 규칙은 한 번에!
+                .authorizeHttpRequests(auth -> auth
+                        // 서버-서버 콜백: 세션 없이 허용 (POST/OPTIONS)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/cfn-callback").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/cfn-callback").permitAll()
 
-        // OAuth2 로그인 설정
-        http.oauth2Login(oauth -> oauth
-                .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
-                .successHandler(oAuth2SuccessHandler)
-                .failureHandler(oAuth2FailureHandler)
-        );
+                        // 헬스/오류/스웨거
+                        .requestMatchers("/", "/health", "/error").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-        // 로그아웃 설정
-        http.logout(l -> l.logoutSuccessUrl(frontendUrl));
+                        // OAuth2 엔드포인트
+                        .requestMatchers("/oauth2/**", "/login/**").permitAll()
+
+                        // 그 외 API는 인증 필요
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+
+                // OAuth2 로그인
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
+                )
+
+                // 로그아웃
+                .logout(l -> l.logoutSuccessUrl(frontendUrl));
 
         return http.build();
     }
 
-    /**
-     * CORS 설정
-     * 프론트엔드(3000포트)에서 백엔드(8080포트)로 쿠키를 포함한 요청 가능하도록 설정
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        // 허용할 출처 (프론트엔드 URL + 백엔드 자신)
-        configuration.setAllowedOrigins(List.of(
-                "http://54.180.117.76:8080",  // 백엔드 자신 (Swagger OAuth2 로그인용)
-                "http://localhost:3000"       // 로컬 개발용 프론트엔드
+        var cfg = new CorsConfiguration();
+        // credentials=true 이면 정확한 오리진 명시 (와일드카드 X)
+        cfg.setAllowedOrigins(List.of(
+                frontendUrl,               // 예: http://localhost:3000
+                "http://localhost:3000"    // 로컬 고정값 보강
         ));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
 
-        // 허용할 HTTP 메서드
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 허용할 헤더
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 쿠키를 포함한 요청 허용 (세션 기반 인증에 필수)
-        configuration.setAllowCredentials(true);
-
-        // preflight 요청 캐시 시간 (초)
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
         return source;
     }
 }
