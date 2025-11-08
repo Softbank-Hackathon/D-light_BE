@@ -29,7 +29,7 @@ public class ProjectService extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true) // TODO : 이후에 BE 배포 추가되면 not null 로 변경 예정
     private Project project;
 
     @Column(name = "service_name", nullable = false)

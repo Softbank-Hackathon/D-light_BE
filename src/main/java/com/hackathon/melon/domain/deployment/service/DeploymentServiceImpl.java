@@ -4,9 +4,12 @@ import com.hackathon.melon.domain.deployment.dto.request.DeploymentRequestDto;
 // Project_Service Repository, Entity 에서 repo url, service name (기존에는 project name이엇으나 서비스로 변경 - 하위 작업이라서.. )
 // 및 default_branch 가져오도록 변경함. default_branch 의 경우 기본값 main 에서 사용자 입력시 override 되도록 구현 필요..(제가 해야되는..아마도?)
 import com.hackathon.melon.domain.deployment.dto.request.FrontendDeploymentRequestDto;
+import com.hackathon.melon.domain.project.entity.Project;
 import com.hackathon.melon.domain.project.entity.ProjectService;
+import com.hackathon.melon.domain.project.entity.ProjectTarget;
 import com.hackathon.melon.domain.project.repository.ProjectServiceRepository;
 // 위의 project_service dto load 관련 임포트 문입니다~
+import com.hackathon.melon.domain.project.repository.ProjectTargetRepository;
 import com.hackathon.melon.global.aws.AssumeRoleRequestDto;
 import com.hackathon.melon.global.aws.AwsService;
 import com.hackathon.melon.global.aws.Ec2DeployService;
@@ -36,6 +39,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     private final Ec2DeployService ec2DeployService;
     private final S3DeployService s3DeployService;
     private final ProjectServiceRepository projectServiceRepository;
+    private final ProjectTargetRepository projectTargetRepository;
 
     @Override
     public void deployProject(DeploymentRequestDto deploymentRequestDto) {
@@ -89,15 +93,27 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
     @Override
     public String deployFrontend(FrontendDeploymentRequestDto dto) {
+        log.info("==================== Frontend Deployment Start ====================");
+        log.info("Attempting to deploy frontend for serviceId: {}", dto.getServiceId());
         ProjectService projectService = projectServiceRepository.findById(dto.getServiceId())
-                .orElseThrow(() -> new IllegalArgumentException("서비스를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("서비스를 찾을 수 없습니다. serviceId: " + dto.getServiceId()));
+        log.info("Found ProjectService: '{}' (ID: {})", projectService.getServiceName(), projectService.getId());
 
-        log.info("Project Service Loaded: {}", projectService);
-        log.info("GitHub Repo URL: {}", projectService.getGithubRepoUrl());
-        log.info("Default Branch: {}", projectService.getDefaultBranch());
-        log.info("Service Name: {}", projectService.getServiceName());
+        Project project = projectService.getProject();
+        if (project == null) {
+            throw new IllegalStateException("ProjectService with ID " + projectService.getId() + " is not associated with a Project.");
+        }
+        log.info("Found parent Project with ID: {}. Now searching for its default ProjectTarget.", project.getId());
 
-        AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(dto.getRoleArn(), dto.getExternalId()));
+        ProjectTarget projectTarget = projectTargetRepository.findByProjectAndIsDefaultTrue(project)
+                .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트의 기본 배포 설정을 찾을 수 없습니다. projectId: " + project.getId()));
+
+        log.info("Default Project Target Loaded: ID={}", projectTarget.getId());
+        log.info("  - Region: {}", projectTarget.getRegion());
+        log.info("  - Role ARN: {}", projectTarget.getRoleArn());
+        log.info("  - External ID: {}", projectTarget.getExternalId());
+
+        AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(projectTarget.getRoleArn(), projectTarget.getExternalId()));
 
         String projectName = projectService.getServiceName() + "-frontend";
 
@@ -122,9 +138,10 @@ public class DeploymentServiceImpl implements DeploymentService {
             run("cd " + workDir + " && " + buildCmd, dto.getEnv());
 
             Path outDir = detectOutDir(workDir);
-            s3DeployService.createS3Bucket(creds, dto.getRegion(), projectName);
-            String indexUrl = s3DeployService.uploadDirectory(creds, dto.getRegion(), projectName, outDir);
+            s3DeployService.createS3Bucket(creds, projectTarget.getRegion(), projectName);
+            String indexUrl = s3DeployService.uploadDirectory(creds, projectTarget.getRegion(), projectName, outDir);
             log.info("프론트엔드 배포 완료: {}", projectName);
+            log.info("==================== Frontend Deployment End ====================");
             return indexUrl;
         } catch (Exception e) {
             log.error("프론트엔드 배포 실패: {}", e.getMessage(), e);
