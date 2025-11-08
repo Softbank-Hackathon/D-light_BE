@@ -16,5 +16,5 @@ public class ProjectTargetRequestDto {
     private Integer sessionDurationSecs;
 
     @JsonAlias("default")
-    private boolean isDefault;
+    private boolean Default;
 }
