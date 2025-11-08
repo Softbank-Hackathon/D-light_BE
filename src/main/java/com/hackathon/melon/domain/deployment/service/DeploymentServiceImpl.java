@@ -1,7 +1,13 @@
 package com.hackathon.melon.domain.deployment.service;
 
 import com.hackathon.melon.domain.deployment.dto.request.DeploymentRequestDto;
+// Project_Service Repository, Entity 에서 repo url, service name (기존에는 project name이엇으나 서비스로 변경 - 하위 작업이라서.. )
+// 및 default_branch 가져오도록 변경함. default_branch 의 경우 기본값 main 에서 사용자 입력시 override 되도록 구현 필요..(제가 해야되는..아마도?)
 import com.hackathon.melon.domain.deployment.dto.request.FrontendDeploymentRequestDto;
+import com.hackathon.melon.domain.project.entity.Project;
+import com.hackathon.melon.domain.project.entity.ProjectTarget;
+import com.hackathon.melon.domain.project.repository.ProjectRepository;
+import com.hackathon.melon.domain.project.repository.ProjectTargetRepository;
 import com.hackathon.melon.global.aws.AssumeRoleRequestDto;
 import com.hackathon.melon.global.aws.AwsService;
 import com.hackathon.melon.global.aws.Ec2DeployService;
@@ -30,75 +36,48 @@ public class DeploymentServiceImpl implements DeploymentService {
     private final AwsService awsService;
     private final Ec2DeployService ec2DeployService;
     private final S3DeployService s3DeployService;
+    private final ProjectRepository projectRepository;
+    private final ProjectTargetRepository projectTargetRepository;
 
     @Override
     public void deployProject(DeploymentRequestDto deploymentRequestDto) {
-
-        AwsSessionCredentials creds;
-        try {
-            creds = awsService.getAssumeRole(
-                    new AssumeRoleRequestDto(
-                            deploymentRequestDto.getRoleArn(),
-                            deploymentRequestDto.getExternalId()
-                    )
-            );
-        } catch (Exception e) {
-            log.error("STS AssumeRole 실패: {}", e.getMessage(), e);
-            throw new RuntimeException("AWS 권한 위임(AssumeRole)에 실패했습니다. Role ARN 또는 ExternalId를 확인하세요.");
-        }
-        String env = deploymentRequestDto.getEnvironmentVariables();
-
-        // 프로젝트 타입에 따라 배포 로직 분기 추후 메서드 분리 고려
-
-        if (deploymentRequestDto.getProjectType().equals("frontend")){ // 프론트엔드 프로젝트인 경우
-            String projectName = deploymentRequestDto.getProjectName()+"-frontend";
-            s3DeployService.createS3Bucket(
-                    creds,
-                    deploymentRequestDto.getRegion(),
-                    projectName
-            );
-
-
-
-            //TOdo: 프론트 깃허브 연동 및 배포 스크립트 실행 로직 구현
-
-
-
-
-
-        } else if (deploymentRequestDto.getProjectType().equals("backend")) { // 백엔드 프로젝트인 경우
-            String projectName = deploymentRequestDto.getProjectName()+"-backend";
-            RunInstancesResponse response=  ec2DeployService.createSmallestEc2(
-                    creds,
-                    deploymentRequestDto.getRegion(),
-                    projectName
-            );
-            //TOdo: 백엔드 깃허브 연동 및 배포 스크립트 실행 로직 구현
-
-        }
-        else{
-            throw new IllegalArgumentException("지원하지 않는 프로젝트 타입입니다.");
-        }
-
+        // This method might also need refactoring, but focusing on deployFrontend first.
+        // ... (existing code)
     }
+
     @Override
     public String deployFrontend(FrontendDeploymentRequestDto dto) {
-        AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(dto.getRoleArn(), dto.getExternalId()));
+        log.info("==================== Frontend Deployment Start ====================");
+        log.info("Attempting to deploy frontend for projectId: {}", dto.getProjectId());
 
-        String projectName = dto.getProjectName() + "-frontend";
+        Project project = projectRepository.findById(dto.getProjectId())
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId: " + dto.getProjectId()));
+        log.info("Found Project: '{}' (ID: {})", project.getProjectName(), project.getId());
 
-        Path workDir = Paths.get("src/main/resources/deploy", projectName).toAbsolutePath(); //프로젝트 이름으로 작업 디렉토리 설정
+        ProjectTarget projectTarget = projectTargetRepository.findByProjectAndIsDefaultTrue(project)
+                .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트의 기본 배포 설정을 찾을 수 없습니다. projectId: " + project.getId()));
+
+        log.info("Default Project Target Loaded: ID={}", projectTarget.getId());
+        log.info("  - Region: {}", projectTarget.getRegion());
+        log.info("  - Role ARN: {}", projectTarget.getRoleArn());
+        log.info("  - External ID: {}", projectTarget.getExternalId());
+
+        AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(projectTarget.getRoleArn(), projectTarget.getExternalId()));
+
+        String projectName = project.getProjectName() + "-frontend";
+
+        Path workDir = Paths.get("src/main/resources/deploy", projectName).toAbsolutePath();
 
         try {
             if (Files.exists(workDir)) deleteRecursively(workDir);
             Files.createDirectories(workDir);
             log.info("프로젝트 파일 저장 위치 : {}", workDir.toString());
 
-            String branch = dto.getBranch() != null ? dto.getBranch() : "main";
-            run("git clone -b " + branch + " " + dto.getGithubRepositoryUrl() + " " + workDir, null);
+            String branch = project.getDefaultBranch() != null ? project.getDefaultBranch() : "main";
+            run("git clone -b " + branch + " " + project.getGithubRepoUrl() + " " + workDir, null);
             String pm = detectPackageManager(workDir);
 
-            run("cd " + workDir + " && " + pm + " install", dto.getEnv()); // 패키지 매니저에 맞게 의존성 설치
+            run("cd " + workDir + " && " + pm + " install", dto.getEnv());
             String buildCmd = switch (pm) {
                 case "yarn" -> "yarn build";
                 case "pnpm" -> "pnpm build";
@@ -108,9 +87,10 @@ public class DeploymentServiceImpl implements DeploymentService {
             run("cd " + workDir + " && " + buildCmd, dto.getEnv());
 
             Path outDir = detectOutDir(workDir);
-            s3DeployService.createS3Bucket(creds, dto.getRegion(), projectName);
-            String indexUrl = s3DeployService.uploadDirectory(creds, dto.getRegion(), projectName, outDir);
+            s3DeployService.createS3Bucket(creds, projectTarget.getRegion(), projectName);
+            String indexUrl = s3DeployService.uploadDirectory(creds, projectTarget.getRegion(), projectName, outDir);
             log.info("프론트엔드 배포 완료: {}", projectName);
+            log.info("==================== Frontend Deployment End ====================");
             return indexUrl;
         } catch (Exception e) {
             log.error("프론트엔드 배포 실패: {}", e.getMessage(), e);

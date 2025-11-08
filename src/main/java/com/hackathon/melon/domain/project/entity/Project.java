@@ -4,15 +4,13 @@ import com.hackathon.melon.domain.user.entity.User;
 import com.hackathon.melon.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 프로젝트 엔티티
- */
 @Entity
-@Table(name = "projects", indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id")
+@Table(name = "projects", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"id", "project_name"})
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,34 +24,33 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "project_name")
+    private String projectName;
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_type")
+    private ServiceType serviceType;
 
-    /**
-     * 프로젝트 생성 정적 팩토리 메서드
-     */
-    public static Project createProject(User user, String name) {
-        Project project = new Project();
-        project.user = user;
-        project.name = name;
-        project.isActive = true;
-        return project;
-    }
+    @Column(name = "github_repo_url")
+    private String githubRepoUrl;
 
-    /**
-     * 프로젝트 비활성화
-     */
-    public void deactivate() {
-        this.isActive = false;
-    }
+    @Column(name = "framework_type")
+    private String frameworkType;
 
-    /**
-     * 프로젝트 활성화
-     */
-    public void activate() {
-        this.isActive = true;
+    @Column(name = "default_branch")
+    private String defaultBranch;
+
+    @Column(name = "is_active")
+    private boolean isActive;
+
+    @Builder
+    public Project(User user, String projectName, ServiceType serviceType, String githubRepoUrl, String frameworkType, String defaultBranch, boolean isActive) {
+        this.user = user;
+        this.projectName = projectName;
+        this.serviceType = serviceType;
+        this.githubRepoUrl = githubRepoUrl;
+        this.frameworkType = frameworkType;
+        this.defaultBranch = defaultBranch;
+        this.isActive = isActive;
     }
 }
