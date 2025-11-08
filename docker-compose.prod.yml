@@ -9,6 +9,7 @@ services:
     env_file:
       - .env
     environment:
+      SPRING_PROFILES_ACTIVE: prod  # 프로덕션 프로파일 활성화
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
