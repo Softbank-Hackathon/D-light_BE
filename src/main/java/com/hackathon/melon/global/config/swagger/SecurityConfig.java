@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**", "/login/**").permitAll()
                 // API 경로는 인증 필요
                 .requestMatchers("/api/**").authenticated()
+                // swagger 열려라
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated()
         );
@@ -71,7 +73,12 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 허용할 출처 (프론트엔드 URL)
-        configuration.setAllowedOrigins(List.of(frontendUrl));
+        //configuration.setAllowedOrigins(List.of(frontendUrl));
+
+        configuration.setAllowedOrigins(List.of(
+                "http://3.37.87.13:3000",
+                "http://localhost:3000"
+        ));
 
         // 허용할 HTTP 메서드
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
