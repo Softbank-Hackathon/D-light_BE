@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +40,11 @@ public class SecurityConfig {
 
         // 인증/인가 설정
         http.authorizeHttpRequests(auth -> auth
+
+                // 서버-서버 콜백: 세션 없이 허용 (POST/OPTIONS)
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/cfn-callback").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/cfn-callback").permitAll()
+
                 // 공개 경로 (인증 불필요)
                 .requestMatchers("/", "/health", "/error").permitAll()
                 // OAuth2 로그인 관련 경로는 Spring Security가 자동 처리
