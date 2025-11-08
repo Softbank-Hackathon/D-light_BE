@@ -5,10 +5,8 @@ import com.hackathon.melon.domain.deployment.dto.request.DeploymentRequestDto;
 // 및 default_branch 가져오도록 변경함. default_branch 의 경우 기본값 main 에서 사용자 입력시 override 되도록 구현 필요..(제가 해야되는..아마도?)
 import com.hackathon.melon.domain.deployment.dto.request.FrontendDeploymentRequestDto;
 import com.hackathon.melon.domain.project.entity.Project;
-import com.hackathon.melon.domain.project.entity.ProjectService;
 import com.hackathon.melon.domain.project.entity.ProjectTarget;
-import com.hackathon.melon.domain.project.repository.ProjectServiceRepository;
-// 위의 project_service dto load 관련 임포트 문입니다~
+import com.hackathon.melon.domain.project.repository.ProjectRepository;
 import com.hackathon.melon.domain.project.repository.ProjectTargetRepository;
 import com.hackathon.melon.global.aws.AssumeRoleRequestDto;
 import com.hackathon.melon.global.aws.AwsService;
