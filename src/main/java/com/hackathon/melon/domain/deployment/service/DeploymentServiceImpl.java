@@ -116,6 +116,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     private String detectPackageManager(Path dir) { // 클라이언트의 프로젝트 (깃허브 링크) 폴더에서 패키지 매니저 감지
         if (Files.exists(dir.resolve("yarn.lock"))) return "yarn";
         if (Files.exists(dir.resolve("pnpm-lock.yaml"))) return "pnpm";
+        log.info("패키지 매니저 감지 실패, 기본값으로 npm 사용");
         return "npm";
     }
 

@@ -36,7 +36,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-### Application Config (contains sensitive data) ###
-src/main/resources/application.yml
-src/main/resources/application-*.yml
