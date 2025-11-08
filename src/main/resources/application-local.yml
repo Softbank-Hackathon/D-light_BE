@@ -1,52 +1,52 @@
-logging:
-  level:
-    root: info
-    com.hackathon.melon: debug
-    software.amazon.awssdk: warn
-
-spring:
-  # 세션 설정
-  session:
-    timeout: 24h  # 로컬 개발 시 세션 타임아웃 24시간
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/Dlight?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 020806
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: create  # 로컬에서는 create 사용 가능
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        jdbc.time_zone: Asia/Seoul
-
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: ${GITHUB_LOCAL_CLIENT_ID}
-            client-secret: ${GITHUB_LOCAL_CLIENT_SECRET}
-            scope: user:email, read:user
-            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
-            client-name: GitHub
-        provider:
-          github:
-            user-name-attribute: id
-
-  deploy:
-    workDir: src/main/resources/workspace
-
-  logging:
-    level:
-      org.springframework.security: DEBUG
-
-# OAuth2 로그인 성공 후 리다이렉트할 URL (로컬 프론트엔드)
-app:
-  oauth2:
-    redirect-uri: http://localhost:8080
+#logging:
+#  level:
+#    root: info
+#    com.hackathon.melon: debug
+#    software.amazon.awssdk: warn
+#
+#spring:
+#  # 세션 설정
+#  session:
+#    timeout: 24h  # 로컬 개발 시 세션 타임아웃 24시간
+#
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/Dlight?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: root
+#    password: 020806
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: create  # 로컬에서는 create 사용 가능
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#        jdbc.time_zone: Asia/Seoul
+#
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          github:
+#            client-id: ${GITHUB_LOCAL_CLIENT_ID}
+#            client-secret: ${GITHUB_LOCAL_CLIENT_SECRET}
+#            scope: user:email, read:user
+#            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+#            client-name: GitHub
+#        provider:
+#          github:
+#            user-name-attribute: id
+#
+#  deploy:
+#    workDir: src/main/resources/workspace
+#
+#  logging:
+#    level:
+#      org.springframework.security: DEBUG
+#
+## OAuth2 로그인 성공 후 리다이렉트할 URL (로컬 프론트엔드)
+#app:
+#  oauth2:
+#    redirect-uri: http://localhost:8080

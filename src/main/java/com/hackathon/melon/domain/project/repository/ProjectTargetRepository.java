@@ -12,5 +12,6 @@ public interface ProjectTargetRepository extends JpaRepository<ProjectTarget, Lo
     Optional<ProjectTarget> findByUserAndIsDefaultTrue(User user);
     Optional<ProjectTarget> findByUserAndEnv(User user, EnvType env);
     List<ProjectTarget> findAllByUser(User user);
+    Optional<ProjectTarget> findByStackId(String stackId);  // CFN 콜백 멱등성용
 }
 

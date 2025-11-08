@@ -1,10 +1,10 @@
 package com.hackathon.melon.domain.auth.onboarding.service;
 
 import com.hackathon.melon.domain.auth.onboarding.dto.*;
-import com.hackathon.melon.domain.auth.onboarding.entity.OnboardingRecord;
 import com.hackathon.melon.domain.auth.onboarding.entity.RegistrationToken;
-import com.hackathon.melon.domain.auth.onboarding.repository.OnboardingRecordRepository;
 import com.hackathon.melon.domain.auth.onboarding.repository.RegistrationTokenRepository;
+import com.hackathon.melon.domain.project.entity.ProjectTarget;
+import com.hackathon.melon.domain.project.repository.ProjectTargetRepository;
 import com.hackathon.melon.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ import java.util.HexFormat;
 public class AuthOnboardingService {
 
     private final RegistrationTokenRepository registrationTokenRepository;
-    private final OnboardingRecordRepository onboardingRecordRepository;
+    private final ProjectTargetRepository projectTargetRepository;
 
     @Value("${aws.credentials.access-key}")
     private String awsAccessKey;
@@ -135,20 +135,24 @@ public class AuthOnboardingService {
             throw new SecurityException("Invalid signature");
         }
 
-        // ExternalId 매칭 확인 (토큰과 연결된 사용자 검증)
-        // 실제로는 토큰 생성 시 externalId를 저장하고 여기서 검증해야 함
-
-        // 멱등성: stackId로 기존 레코드 확인
-        OnboardingRecord record = onboardingRecordRepository.findByStackId(request.getStackId())
+        // 멱등성: stackId로 기존 ProjectTarget 확인
+        ProjectTarget projectTarget = projectTargetRepository.findByStackId(request.getStackId())
                 .orElse(null);
 
-        if (record != null) {
+        if (projectTarget != null) {
             // 업데이트 (멱등)
-            record.updateRecord(request.getRoleArn(), request.getBucketName(), request.getRegion());
-            log.info("Updated existing onboarding record: stackId={}", request.getStackId());
+            projectTarget.updateOnboardingInfo(
+                    request.getRoleArn(),
+                    request.getBucketName(),
+                    request.getRegion(),
+                    request.getAccountId(),
+                    request.getExternalId(),
+                    request.getStackId()
+            );
+            log.info("Updated existing ProjectTarget: stackId={}", request.getStackId());
         } else {
             // 신규 생성
-            record = OnboardingRecord.builder()
+            projectTarget = ProjectTarget.builder()
                     .user(token.getUser())
                     .accountId(request.getAccountId())
                     .roleArn(request.getRoleArn())
@@ -157,9 +161,10 @@ public class AuthOnboardingService {
                     .externalId(request.getExternalId())
                     .stackId(request.getStackId())
                     .correlationId(registrationToken)
+                    .isDefault(false)  // 온보딩 시에는 기본값 아님
                     .build();
-            onboardingRecordRepository.save(record);
-            log.info("Created new onboarding record: stackId={}, accountId={}", request.getStackId(), request.getAccountId());
+            projectTargetRepository.save(projectTarget);
+            log.info("Created new ProjectTarget: stackId={}, accountId={}", request.getStackId(), request.getAccountId());
         }
 
         // 토큰 사용 처리
