@@ -72,12 +72,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 출처 (프론트엔드 URL)
-        //configuration.setAllowedOrigins(List.of(frontendUrl));
-
+        // 허용할 출처 (프론트엔드 URL + 백엔드 자신)
         configuration.setAllowedOrigins(List.of(
-                "http://3.37.87.13:3000",
-                "http://localhost:3000"
+                "http://54.180.117.76:8080",  // 백엔드 자신 (Swagger OAuth2 로그인용)
+                "http://localhost:3000"       // 로컬 개발용 프론트엔드
         ));
 
         // 허용할 HTTP 메서드

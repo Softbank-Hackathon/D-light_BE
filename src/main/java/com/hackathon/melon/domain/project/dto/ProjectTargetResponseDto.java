@@ -10,19 +10,23 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProjectTargetResponseDto {
     private Long id;
-    private Long projectId;
+    private Long userId;
     private String env;
     private String roleArn;
+    private String externalId;
     private String region;
+    private Integer sessionDurationSecs;
     private boolean isDefault;
 
     public static ProjectTargetResponseDto from(ProjectTarget projectTarget) {
         return ProjectTargetResponseDto.builder()
                 .id(projectTarget.getId())
-                .projectId(projectTarget.getProject().getId())
+                .userId(projectTarget.getUser().getId())
                 .env(projectTarget.getEnv() != null ? projectTarget.getEnv().name() : null)
                 .roleArn(projectTarget.getRoleArn())
+                .externalId(projectTarget.getExternalId())
                 .region(projectTarget.getRegion())
+                .sessionDurationSecs(projectTarget.getSessionDurationSecs())
                 .isDefault(projectTarget.isDefault())
                 .build();
     }

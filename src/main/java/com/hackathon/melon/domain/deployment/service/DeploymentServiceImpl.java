@@ -54,8 +54,9 @@ public class DeploymentServiceImpl implements DeploymentService {
                 .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId: " + dto.getProjectId()));
         log.info("Found Project: '{}' (ID: {})", project.getProjectName(), project.getId());
 
-        ProjectTarget projectTarget = projectTargetRepository.findByProjectAndIsDefaultTrue(project)
-                .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트의 기본 배포 설정을 찾을 수 없습니다. projectId: " + project.getId()));
+        // Project에서 User를 가져와서 해당 User의 기본 배포 설정 조회
+        ProjectTarget projectTarget = projectTargetRepository.findByUserAndIsDefaultTrue(project.getUser())
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자의 기본 배포 설정을 찾을 수 없습니다. userId: " + project.getUser().getId()));
 
         log.info("Default Project Target Loaded: ID={}", projectTarget.getId());
         log.info("  - Region: {}", projectTarget.getRegion());

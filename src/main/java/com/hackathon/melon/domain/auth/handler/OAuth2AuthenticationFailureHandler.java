@@ -46,6 +46,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 .queryParam("error", "true")
                 .queryParam("message", exception.getLocalizedMessage())
                 .build()
+                .encode()  // URL 인코딩 추가
                 .toUriString();
     }
 }
