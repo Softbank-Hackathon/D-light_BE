@@ -5,6 +5,10 @@ logging:
     software.amazon.awssdk: warn
 
 spring:
+  # 세션 설정
+  session:
+    timeout: 24h  # 로컬 개발 시 세션 타임아웃 24시간
+
   datasource:
     url: jdbc:mysql://localhost:3306/Dlight?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
