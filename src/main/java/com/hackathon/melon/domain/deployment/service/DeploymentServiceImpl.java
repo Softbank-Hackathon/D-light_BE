@@ -62,10 +62,17 @@ public class DeploymentServiceImpl implements DeploymentService {
         log.info("  - Region: {}", projectTarget.getRegion());
         log.info("  - Role ARN: {}", projectTarget.getRoleArn());
         log.info("  - External ID: {}", projectTarget.getExternalId());
+        log.info("  - Bucket Name: {}", projectTarget.getBucketName());
+
+        // 온보딩 시 생성된 버킷이 없으면 에러
+        if (projectTarget.getBucketName() == null || projectTarget.getBucketName().isEmpty()) {
+            throw new IllegalArgumentException("온보딩된 S3 버킷이 없습니다. AWS 계정 온보딩을 먼저 완료해주세요.");
+        }
 
         AwsSessionCredentials creds = awsService.getAssumeRole(new AssumeRoleRequestDto(projectTarget.getRoleArn(), projectTarget.getExternalId()));
 
         String projectName = project.getProjectName() + "-frontend";
+        String bucketName = projectTarget.getBucketName();  // 온보딩 시 생성된 버킷 사용
 
         Path workDir = Paths.get("src/main/resources/deploy", projectName).toAbsolutePath();
 
@@ -88,9 +95,9 @@ public class DeploymentServiceImpl implements DeploymentService {
             run("cd " + workDir + " && " + buildCmd, dto.getEnv());
 
             Path outDir = detectOutDir(workDir);
-            s3DeployService.createS3Bucket(creds, projectTarget.getRegion(), projectName);
-            String indexUrl = s3DeployService.uploadDirectory(creds, projectTarget.getRegion(), projectName, outDir);
-            log.info("프론트엔드 배포 완료: {}", projectName);
+            // 온보딩 시 생성된 버킷 사용 (버킷이 이미 존재하므로 createS3Bucket 호출 불필요)
+            String indexUrl = s3DeployService.uploadDirectory(creds, projectTarget.getRegion(), bucketName, outDir);
+            log.info("프론트엔드 배포 완료: bucketName={}", bucketName);
             log.info("==================== Frontend Deployment End ====================");
             return indexUrl;
         } catch (Exception e) {

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -49,8 +51,28 @@ public class ProjectTarget extends BaseEntity {
     @Column(name = "is_default", nullable = false)
     private boolean isDefault;
 
+    // ========== AWS 온보딩 정보 ==========
+
+    @Column(name = "account_id", length = 12)
+    private String accountId;  // AWS 계정 ID
+
+    @Column(name = "bucket_name", length = 255)
+    private String bucketName;  // S3 버킷 이름
+
+    @Column(name = "stack_id", length = 512, unique = true)
+    private String stackId;  // CloudFormation Stack ID (멱등성)
+
+    @Column(name = "correlation_id", length = 255)
+    private String correlationId;  // Registration Token (추적용)
+
+    @Column(name = "onboarded_at")
+    private LocalDateTime onboardedAt;  // 온보딩 완료 시간
+
     @Builder
-    public ProjectTarget(User user, EnvType env, String roleArn, String externalId, String region, Integer sessionDurationSecs, boolean isDefault) {
+    public ProjectTarget(User user, EnvType env, String roleArn, String externalId, String region,
+                        Integer sessionDurationSecs, boolean isDefault,
+                        String accountId, String bucketName, String stackId,
+                        String correlationId, LocalDateTime onboardedAt) {
         this.user = user;
         this.env = env;
         this.roleArn = roleArn;
@@ -58,5 +80,22 @@ public class ProjectTarget extends BaseEntity {
         this.region = region;
         this.sessionDurationSecs = sessionDurationSecs;
         this.isDefault = isDefault;
+        this.accountId = accountId;
+        this.bucketName = bucketName;
+        this.stackId = stackId;
+        this.correlationId = correlationId;
+        this.onboardedAt = onboardedAt;
+    }
+
+    // 온보딩 정보 업데이트 (멱등성)
+    public void updateOnboardingInfo(String roleArn, String bucketName, String region,
+                                    String accountId, String externalId, String stackId) {
+        this.roleArn = roleArn;
+        this.bucketName = bucketName;
+        this.region = region;
+        this.accountId = accountId;
+        this.externalId = externalId;
+        this.stackId = stackId;
+        this.onboardedAt = LocalDateTime.now();
     }
 }
