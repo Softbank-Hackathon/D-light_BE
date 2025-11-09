@@ -26,6 +26,9 @@ public class RegistrationToken extends BaseEntity {
     @Column(name = "token", nullable = false, unique = true, length = 128)
     private String token;
 
+    @Column(name = "external_id", nullable = false, unique = true, length = 8)
+    private String externalId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -41,8 +44,9 @@ public class RegistrationToken extends BaseEntity {
     private LocalDateTime usedAt;
 
     @Builder
-    public RegistrationToken(String token, User user, LocalDateTime expiresAt, TokenStatus status) {
+    public RegistrationToken(String token, String externalId, User user, LocalDateTime expiresAt, TokenStatus status) {
         this.token = token;
+        this.externalId = externalId;
         this.user = user;
         this.expiresAt = expiresAt;
         this.status = status;

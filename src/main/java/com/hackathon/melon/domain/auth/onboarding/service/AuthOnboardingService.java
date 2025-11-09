@@ -60,10 +60,12 @@ public class AuthOnboardingService {
     @Transactional
     public RegistrationTokenResponse createRegistrationToken(User user, RegistrationTokenRequest request) {
         String token = generateSecureToken();
+        String externalId = generateExternalId();
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(request.getTtlSeconds());
 
         RegistrationToken registrationToken = RegistrationToken.builder()
                 .token(token)
+                .externalId(externalId)
                 .user(user)
                 .expiresAt(expiresAt)
                 .status(RegistrationToken.TokenStatus.ACTIVE)
@@ -71,10 +73,11 @@ public class AuthOnboardingService {
 
         registrationTokenRepository.save(registrationToken);
 
-        log.info("Registration token created for user {}: {}", user.getId(), token);
+        log.info("Registration token created for user {}: {}, externalId: {}", user.getId(), token, externalId);
 
         return RegistrationTokenResponse.builder()
                 .registrationToken(token)
+                .externalId(externalId)
                 .expiresAt(expiresAt)
                 .build();
     }
@@ -95,16 +98,16 @@ public class AuthOnboardingService {
         // Presigned URL 생성
         String presignedUrl = generatePresignedUrl(templateBucket, templateKey, templateRegion, 900);
 
-        // Quick Create URL 조합
+        // Quick Create URL 조합 (token에서 externalId 가져옴)
         String quickCreateUrl = buildQuickCreateUrl(
                 request.getRegion(),
                 presignedUrl,
                 request.getStackName(),
-                request.getExternalId(),
+                token.getExternalId(),
                 request.getRegistrationToken()
         );
 
-        log.info("Quick create link generated for user {}: stackName={}", user.getId(), request.getStackName());
+        log.info("Quick create link generated for user {}: stackName={}, externalId={}", user.getId(), request.getStackName(), token.getExternalId());
 
         return QuickCreateLinkResponse.builder()
                 .quickCreateUrl(quickCreateUrl)
@@ -185,6 +188,13 @@ public class AuthOnboardingService {
         byte[] bytes = new byte[TOKEN_LENGTH];
         random.nextBytes(bytes);
         return TOKEN_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private String generateExternalId() {
+        SecureRandom random = new SecureRandom();
+        // 8자리 숫자 생성 (10000000 ~ 99999999)
+        int externalIdNum = 10000000 + random.nextInt(90000000);
+        return String.valueOf(externalIdNum);
     }
 
     private String generatePresignedUrl(String bucket, String key, String region, int expiresIn) {

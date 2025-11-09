@@ -13,5 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RegistrationTokenResponse {
     private String registrationToken;
+    private String externalId;
     private LocalDateTime expiresAt;
 }
