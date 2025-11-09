@@ -5,7 +5,6 @@ logging:
     software.amazon.awssdk: warn
 
 spring:
-
   # 세션 설정
   session:
     timeout: 12h  # 세션 타임아웃 12시간
@@ -37,7 +36,8 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: user:email, read:user
-            redirect-uri: "http://54.180.117.76:8080/login/oauth2/code/github"
+#            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            redirect-uri: "https://api.clearplate.store/login/oauth2/code/github"
             client-name: GitHub
         provider:
           github:
@@ -50,6 +50,7 @@ spring:
 app:
   oauth2:
     redirect-uri: https://dlite.vercel.app
+#     redirect-uri: http://localhost:8080
 
 # AWS 설정
 aws:
@@ -62,10 +63,5 @@ aws:
       key: ${AWS_ONBOARDING_KEY:template.yaml}
       region: ${AWS_ONBOARDING_REGION:ap-northeast-2}
 
-# 서버 쿠키 설정 (HTTPS ↔ HTTP Mixed Content 허용)
 server:
-  servlet:
-    session:
-      cookie:
-        same-site: none  # 크로스 도메인 허용
-        secure: false    # HTTP에서도 쿠키 전송
+  forward-headers-strategy: framework

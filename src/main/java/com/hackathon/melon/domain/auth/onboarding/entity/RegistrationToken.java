@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_token", columnList = "token"),
         @Index(name = "idx_user_id", columnList = "user_id")
 })
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RegistrationToken extends BaseEntity {

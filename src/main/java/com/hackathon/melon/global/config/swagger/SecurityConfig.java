@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.http.HttpMethod;
+import org.springframework.boot.web.servlet.server.CookieSameSiteSupplier;
 
 import java.util.Arrays;
 import java.util.List;
@@ -85,10 +86,7 @@ public class SecurityConfig {
         // 허용할 출처 (프론트엔드 URL + 백엔드 자신)
         configuration.setAllowedOrigins(List.of(
                 "https://dlite.vercel.app",   // 프론트엔드 (프로덕션)
-                "https://dlite.vercel.app/",
-                "http://54.180.117.76:8080",  // 백엔드 자신 (Swagger OAuth2 로그인용)
-                "http://localhost:8080",      // 로컬 백엔드
-                "http://localhost:3000"       // 로컬 프론트엔드
+                "http://3.35.234.128:8080"// 백엔드 자신 (Swagger OAuth2 로그인용)
         ));
 
         // 허용할 HTTP 메서드
@@ -106,5 +104,14 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    /**
+     * 크로스 도메인 환경에서 세션 쿠키가 전달되도록 SameSite=None 설정
+     * HTTPS 환경에서만 작동 (Secure 플래그 자동 설정)
+     */
+    @Bean
+    public CookieSameSiteSupplier cookieSameSiteSupplier() {
+        return CookieSameSiteSupplier.ofNone();
     }
 }
