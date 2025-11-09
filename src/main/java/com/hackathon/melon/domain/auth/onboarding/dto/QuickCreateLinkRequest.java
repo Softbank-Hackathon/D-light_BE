@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class QuickCreateLinkRequest {
     @NotBlank
-    @Pattern(regexp = "^[0-9]{8}$", message = "External ID must be exactly 8 digits")
-    private String externalId;
-
-    @NotBlank
     private String registrationToken;
 
     @NotBlank
